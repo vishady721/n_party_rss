@@ -1,5 +1,7 @@
 import itertools
 import random
+import hmac
+import hashlib
 from .prime_field import PrimeFieldElement
 
 def generate_all_sets(num_parties, num_reconstruct):
@@ -43,3 +45,15 @@ def generate_correction_share_mapping(num_parties, all_share_sets):
                 mapping[i + 1] = random_share_set
                 break
     return mapping
+
+class PRF:
+    def __init__(self, key_tuple):
+        key = b''
+        for elem in key_tuple:
+            key += str(elem).encode('utf-8')
+        self.prf = hmac.new(key, b'data', hashlib.sha256)
+    
+    def next(self):
+        value = self.prf.digest()
+        self.prf.update(value)
+        return PrimeFieldElement(int.from_bytes(value, 'little'))

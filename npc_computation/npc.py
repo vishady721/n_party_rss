@@ -1,10 +1,7 @@
-import hmac
-import hashlib
 import random
 import copy
-from .utils import generate_all_sets, distribute_shares, generate_correction_share_mapping, generate_own_mapping
+from .utils import generate_all_sets, distribute_shares, generate_correction_share_mapping, generate_own_mapping, PRF
 from .prime_field import PrimeFieldElement
-
 
 class ReplicatedShareMap:
     def __init__(self, share_map, num_parties, num_reconstruct, all_share_sets):
@@ -90,15 +87,3 @@ class ReplicatedShareMap:
         if len(share_sets_to_add) != 0:
             return None
         return secret
-
-class PRF:
-    def __init__(self, key_tuple):
-        key = b''
-        for elem in key_tuple:
-            key += str(elem).encode('utf-8')
-        self.prf = hmac.new(key, b'data', hashlib.sha256)
-    
-    def next(self):
-        value = self.prf.digest()
-        self.prf.update(value)
-        return PrimeFieldElement(int.from_bytes(value, 'little'))   
